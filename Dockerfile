@@ -22,7 +22,7 @@ RUN useradd --create-home $USER
 # files are installed, by default, in the path noted below.
 #
 # We'll mount both fo these in the docker-compose.yml & Dockerrun.aws.json
-RUN mkdir -p $DATA_PATH && chown -R $USER:$USER $DATA_PATH $R_LIBS_USER
+RUN mkdir -p $APP_PATH $DATA_PATH && chown -R $USER:$USER $APP_PATH $DATA_PATH $R_LIBS_USER
 
 # Switch to the user, so we don't install everything as root
 USER $USER
@@ -35,6 +35,11 @@ WORKDIR $APP_PATH
 
 # Default R folder for storing libs is /usr/local/lib/R/site-library.
 # We should map this in docker-compose.yml and Dockerrun.aws.json
-RUN Rscript -e "install.packages(c('ggplot2', 'gridExtra', 'Hmisc', 'jsonlite', 'scales', 'tidyr', 'ncdf4', 'Rserve', 'XML', 'testthat', 'readr', 'rmarkdown', 'roxygen2'))"
+#
+# Some of these packages would ideally not exist in the "production" image
+# snapshot because they're development tools. However, the build time on these
+# is enough to make local development and testing cycles slower so I'm keeping
+# these in the base for now.
+RUN Rscript -e "install.packages(c('devtools', 'ggplot2', 'gridExtra', 'Hmisc', 'jsonlite', 'scales', 'tidyr', 'ncdf4', 'Rserve', 'XML', 'testthat', 'readr', 'rmarkdown', 'roxygen2'))"
 
 LABEL org.ebimodeling.maintainer="Jay Dorsey"
